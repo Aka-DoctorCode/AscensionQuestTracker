@@ -1,7 +1,7 @@
--- ACM (ACM) - Core.lua
-local addonName, ACM = ...
+-- AscensionCooldownManager (AscensionCooldownManager) - Core.lua
+local addonName, AscensionCooldownManager = ...
 local AceAddon = LibStub("AceAddon-3.0")
-local Ascension = AceAddon:NewAddon(ACM, addonName, "AceConsole-3.0", "AceEvent-3.0")
+local Ascension = AceAddon:NewAddon(AscensionCooldownManager, addonName, "AceConsole-3.0", "AceEvent-3.0")
 
 -- Default configuration defining the rows structure
 local defaults = {
@@ -45,13 +45,13 @@ function Ascension:OnInitialize()
     self:UpdateLayout()
 
     -- Register chat command to test/reload
-    self:RegisterChatCommand("acm", "ChatCommand")
+    self:RegisterChatCommand("AscensionCooldownManager", "ChatCommand")
 end
 
 function Ascension:CreateMainContainer()
     -- This is the "Box" you requested.
     -- Anchor Point: BOTTOM (Center is implied by SetPoint logic)
-    self.mainContainer = CreateFrame("Frame", "ACM_MainContainer", UIParent)
+    self.mainContainer = CreateFrame("Frame", "AscensionCooldownManager_MainContainer", UIParent)
     self.mainContainer:SetSize(1, 1) -- Size will be dynamic, but starts small
 
     -- Apply saved position
@@ -91,8 +91,8 @@ function Ascension:UpdateLayout()
         -- Create/Update icons for this row
         for i = 1, numIcons do
             -- Create a placeholder frame for the icon (Visual Test)
-            -- Naming convention: ACM_Row[X]_Icon[Y]
-            local frameName = string.format("ACM_Row%d_Icon%d", rowIndex, i)
+            -- Naming convention: AscensionCooldownManager_Row[X]_Icon[Y]
+            local frameName = string.format("AscensionCooldownManager_Row%d_Icon%d", rowIndex, i)
             local iconFrame = _G[frameName] or CreateFrame("Frame", frameName, container)
 
             iconFrame:SetSize(iconWidth, iconHeight)
@@ -126,8 +126,8 @@ end
 function Ascension:ChatCommand(input)
     if input == "update" then
         self:UpdateLayout()
-        print("ACM: Layout Updated")
+        print("AscensionCooldownManager: Layout Updated")
     else
-        print("Use '/acm update' to refresh layout")
+        print("Use '/AscensionCooldownManager update' to refresh layout")
     end
 end

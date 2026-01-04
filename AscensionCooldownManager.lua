@@ -1,4 +1,4 @@
-local ADDON_NAME = "ACM"
+local ADDON_NAME = "AscensionCooldownManager"
 local ATS = CreateFrame("Frame")
 
 -- Default settings
@@ -10,20 +10,20 @@ local DEFAULTS = {
 
 -- Database handling
 local function EnsureDB()
-    if type(ACMDB) ~= "table" then
-        ACMDB = {}
+    if type(AscensionCooldownManagerDB) ~= "table" then
+        AscensionCooldownManagerDB = {}
     end
     for k, v in pairs(DEFAULTS) do
-        if ACMDB[k] == nil then
-            ACMDB[k] = v
+        if AscensionCooldownManagerDB[k] == nil then
+            AscensionCooldownManagerDB[k] = v
         end
     end
 end
 
 -- Logging
 local function Log(msg, ...)
-    if ACMDB and ACMDB.debug then
-        print("|cff00ccff[ACM]|r:", msg, ...)
+    if AscensionCooldownManagerDB and AscensionCooldownManagerDB.debug then
+        print("|cff00ccff[AscensionCooldownManager]|r:", msg, ...)
     end
 end
 
@@ -171,10 +171,10 @@ ATS:SetScript("OnEvent", function(self, event, ...)
 end)
 
 -- Slash Commands
-SLASH_ACM1 = "/ats"
-SLASH_ACM2 = "/ACM"
+SLASH_AscensionCooldownManager1 = "/ats"
+SLASH_AscensionCooldownManager2 = "/AscensionCooldownManager"
 
-SlashCmdList["ACM"] = function(msg)
+SlashCmdList["AscensionCooldownManager"] = function(msg)
     local cmd = msg:lower()
     if cmd == "debug" then
         if AscensionTalentDB_V2 then
