@@ -72,7 +72,7 @@ local function CreateOptionsPanel()
     sliderScale:SetPoint("TOPLEFT", cbLock, "BOTTOMLEFT", 0, -30)
     sliderScale:SetMinMaxValues(0.5, 2.0)
     sliderScale:SetValue(AscensionQuestTrackerDB.scale or 1.0)
-    sliderScale:SetSetValueStep(0.1)
+    sliderScale:SetValueStep(0.1)
     sliderScale:SetObeyStepOnDrag(true)
     
     _G[sliderScale:GetName() .. "Low"]:SetText("0.5")
