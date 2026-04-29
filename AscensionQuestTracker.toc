@@ -1,13 +1,13 @@
 ## Interface: 120005
 ## Title: Ascension Quest Tracker
-## Notes: Minimalistic quest tracker.
+## Notes: Enhanced Questing Experience
 ## Author: Aka-DoctorCode
 ## Category: Interface
-## Version: V10
+## Version: @project-version@
 ## SavedVariables: AscensionQuestTrackerDB
 ## IconTexture: Interface\AddOns\AscensionQuestTracker\Media\AkaDoctorCode.png
 ## X-Curse-Project-ID: 1419831
-# X-Wago-ID: 
+## X-Wago-ID: qGYZXzNg
 
 # Core Files
 Core.lua
