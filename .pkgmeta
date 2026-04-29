@@ -1,8 +1,17 @@
 package-as: AscensionQuestTracker
 license-output: LICENSE
+enable-nolib-creation: no
+required-dependencies:
+    - AscensionSuit
 ignore:
-    - __MACOSX
-    - pkgmeta.yaml
+    .github
+    .gitattributes
+    .gitignore
+    .pkgmeta
+    .DS_Store
+    __MACOSX
+    CHANGELOG.txt
+    README.md
 manual-changelog: 
     filename: CHANGELOG.txt
     markup-type: html
