@@ -1,4 +1,4 @@
-<h1>@project-version@</h1>
+<h1>V12</h1>
 <ul>
     <li>Standardized method of uploading the addon to Curseforge and Wago</li>
 </ul>

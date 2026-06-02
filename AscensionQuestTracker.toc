@@ -3,7 +3,7 @@
 ## Notes: Enhanced Questing Experience
 ## Author: Aka-DoctorCode
 ## Category: Interface
-## Version: @project-version@
+## Version: V12
 ## SavedVariables: AscensionQuestTrackerDB
 ## IconTexture: Interface\AddOns\AscensionQuestTracker\Media\AkaDoctorCode.png
 ## X-Curse-Project-ID: 1419831
