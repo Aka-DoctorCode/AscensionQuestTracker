@@ -3,21 +3,24 @@
 ## Notes: Enhanced Questing Experience
 ## Author: Aka-DoctorCode
 ## Category: Interface
-## Version: V12
+## Version: @project-version@
 ## SavedVariables: AscensionQuestTrackerDB
+## RequiredDeps: AscensionSuit
+## OptionalDeps: Ace3, LibSharedMedia-3.0
 ## IconTexture: Interface\AddOns\AscensionQuestTracker\Media\AkaDoctorCode.png
 ## X-Curse-Project-ID: 1419831
 ## X-Wago-ID: qGYZXzNg
-
-# Core Files
-Core.lua
-Themes.lua
-Config.lua
-
-# Modules
-Scenarios.lua
-Widgets.lua
-BonusObjectives.lua
-WorldQuests.lua
-QuestLog.lua
-Achievements.lua
+Core\Init.lua
+Core\Config.lua
+UI\Templates.xml
+Data\DataEngine.lua
+UI\Renderer.lua
+Data\Providers\QuestProvider.lua
+Data\Providers\WorldQuestProvider.lua
+Data\Providers\ScenarioProvider.lua
+Data\Providers\AchievementProvider.lua
+Data\Providers\ProfessionProvider.lua
+Data\Providers\TradingPostProvider.lua
+Data\Providers\AutoQuestProvider.lua
+Data\Providers\WidgetProvider.lua
+Data\Providers\BonusObjectiveProvider.lua
