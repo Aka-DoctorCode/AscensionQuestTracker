@@ -1,4 +1,4 @@
-## Interface: 120005
+## Interface: 120007
 ## Title: Ascension Quest Tracker
 ## Notes: Enhanced Questing Experience
 ## Author: Aka-DoctorCode

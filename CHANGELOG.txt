@@ -1,17 +1,6 @@
 <h1>@project-version@</h1>
 <ul>
-    <li>You can now click on category headers to collapse or expand them! (Currently available for Quests, World Quests, and Bonus Objectives)</li>
-    <li>Individual quests can now be collapsed or expanded by Left-Clicking on their titles!</li>
-    <li>Restored the Right-Click Context Menu for quests, giving you quick access to Open Details, Share, or Abandon.</li>
-    <li><b>Bug Fix:</b> Achievements, Professions, and other modules now instantly and automatically update their progress in real-time (fixed an issue requiring a manual collapse to refresh).</li>
-    <li><b>Bug Fix:</b> "Abandon Quest" and "Share Quest" in the context menu now work flawlessly without throwing errors, adapting to the modern WoW API.</li>
-    <li><b>Bug Fix:</b> Shift+Clicking an achievement to stop tracking it now works correctly using the modern ContentTracking system.</li>
-    <li>Added a "Background Alpha" slider in settings so you can darken the tracker background.</li>
-    <li>Shift-click any World Quest or normal Quest to quickly untrack it. You can also Shift-click World Quests on the map to track them from anywhere!</li>
-    <li>Bonus Objectives now reliably appear as soon as you walk into their areas, even inside caves and buildings.</li>
-    <li>Bonus Objectives now have their own dedicated category section.</li>
-    <li>Fixed an issue that caused the tracker to break if the game took too long to load a World Quest's name.</li>
-    <li>Fixed quest and bonus objective progress text and bars not showing up properly on the latest WoW updates.</li>
+    <li>Update TOC for 12.0.7</li>
 </ul>
 <br>
 <h2>Positive feedback is always appreciated, it helps me to continue working on this project</h2>
