@@ -27,12 +27,12 @@ jobs:
           WAGO_API_TOKEN: ${{ secrets.WAGO_API_TOKEN }}
           GITHUB_OAUTH: ${{ secrets.GITHUB_TOKEN }}
 
-      # - name: triggerAscensionSuitUpdate
-      #   env:
-      #     GH_TOKEN: ${{ secrets.PAT_TOKEN }}
-      #   run: |
-      #     gh api repos/Aka-DoctorCode/AscensionSuit/dispatches \
-      #       --method POST \
-      #       -f event_type="update-suite" \
-      #       -F client_payload[trigger]="AscensionQuestTracker" \
-      #       -F client_payload[version]="${{ github.ref_name }}"
+      - name: triggerAscensionSuitUpdate
+        env:
+          GH_TOKEN: ${{ secrets.PAT_TOKEN }}
+        run: |
+          gh api repos/Aka-DoctorCode/AscensionSuit/dispatches \
+            --method POST \
+            -f event_type="update-suite" \
+            -F client_payload[trigger]="AscensionQuestTracker" \
+            -F client_payload[version]="${{ github.ref_name }}"
