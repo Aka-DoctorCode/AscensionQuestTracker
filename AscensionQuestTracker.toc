@@ -10,6 +10,7 @@
 ## IconTexture: Interface\AddOns\AscensionQuestTracker\Media\AkaDoctorCode.png
 ## X-Curse-Project-ID: 1419831
 ## X-Wago-ID: qGYZXzNg
+
 Core\Init.lua
 Core\Config.lua
 UI\Templates.xml
