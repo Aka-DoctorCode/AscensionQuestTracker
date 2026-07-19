@@ -45,6 +45,7 @@ function config:init()
                 hideInInstanced = false,
                 hideInPvP = false,
                 focusMode = false,
+                autoCollapseAll = false,
             },
             colors = {
                 header = {1.0, 0.82, 0.0, 1},
@@ -169,7 +170,21 @@ function config:init()
                     function() return self.db.profile.automation.hideNativeTracker end,
                     function(v) 
                         self.db.profile.automation.hideNativeTracker = v 
-                        print("|cff66BFFF[AscensionTracker]|r Please type /reload for tracker visibility changes to apply.")
+                        if not StaticPopupDialogs["ASCENSION_TRACKER_RELOAD"] then
+                            StaticPopupDialogs["ASCENSION_TRACKER_RELOAD"] = {
+                                text = "Changing the Blizzard Tracker visibility requires a UI reload. Reload now?",
+                                button1 = "Yes",
+                                button2 = "No",
+                                OnAccept = function()
+                                    ReloadUI()
+                                end,
+                                timeout = 0,
+                                whileDead = true,
+                                hideOnEscape = true,
+                                preferredIndex = 3,
+                            }
+                        end
+                        StaticPopup_Show("ASCENSION_TRACKER_RELOAD")
                     end
                 )
                 layout:checkbox("hideInCombat", "Hide in Combat", nil,
@@ -179,6 +194,17 @@ function config:init()
                 layout:checkbox("hideInInstanced", "Auto-Collapse in Dungeons", nil,
                     function() return self.db.profile.automation.hideInInstanced end,
                     function(v) self.db.profile.automation.hideInInstanced = v end
+                )
+                layout:checkbox("autoCollapseAll", "Auto Collapse Blizzard Tracker", "Automatically collapse the native Blizzard tracker on load.",
+                    function() return self.db.profile.automation.autoCollapseAll end,
+                    function(v) 
+                        self.db.profile.automation.autoCollapseAll = v
+                        if v and ObjectiveTrackerFrame and ObjectiveTrackerFrame.SetCollapsed then
+                            ObjectiveTrackerFrame:SetCollapsed(true)
+                        elseif not v and ObjectiveTrackerFrame and ObjectiveTrackerFrame.SetCollapsed then
+                            ObjectiveTrackerFrame:SetCollapsed(false)
+                        end
+                    end
                 )
                 layout:checkbox("hideInPvP", "Hide in Instanced PvP", nil,
                     function() return self.db.profile.automation.hideInPvP end,

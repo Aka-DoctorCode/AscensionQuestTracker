@@ -30,16 +30,62 @@ end
 function scenarioData:update()
     wipe(self.state)
 
-    local name, currentStage, numStages = C_Scenario.GetInfo()
-    if not name then return end
+    local scenarioInfo = C_Scenario.GetInfo()
+    if type(scenarioInfo) == "table" then
+        if not scenarioInfo.name then return end
+        self.state.name = scenarioInfo.name
+        self.state.currentStage = scenarioInfo.currentStage
+        self.state.numStages = scenarioInfo.numStages
+    else
+        local name, currentStage, numStages = C_Scenario.GetInfo()
+        if not name then return end
+        self.state.name = name
+        self.state.currentStage = currentStage
+        self.state.numStages = numStages
+    end
 
-    self.state.name = name
-    self.state.currentStage = currentStage
-    self.state.numStages = numStages
+    local stepInfo = C_Scenario.GetStepInfo()
+    if type(stepInfo) == "table" then
+        self.state.stepName = stepInfo.title
+        self.state.stepDescription = stepInfo.description
+        self.state.numCriteria = stepInfo.numCriteria
+    else
+        local stepName, stepDescription, numCriteria = C_Scenario.GetStepInfo()
+        self.state.stepName = stepName
+        self.state.stepDescription = stepDescription
+        self.state.numCriteria = numCriteria
+    end
 
-    local stepName, stepDescription = C_Scenario.GetStepInfo()
-    self.state.stepName = stepName
-    self.state.stepDescription = stepDescription
+    self.state.criteria = {}
+    if self.state.numCriteria and self.state.numCriteria > 0 then
+        for i = 1, self.state.numCriteria do
+            local successInfo, cInfo = false, nil
+            if C_ScenarioInfo and C_ScenarioInfo.GetCriteriaInfo then
+                successInfo, cInfo = pcall(C_ScenarioInfo.GetCriteriaInfo, i)
+            end
+            
+            if successInfo and type(cInfo) == "table" then
+                table.insert(self.state.criteria, {
+                    name = cInfo.description or "",
+                    isCompleted = cInfo.completed,
+                    quantity = cInfo.quantity,
+                    totalQuantity = cInfo.totalQuantity,
+                    isWeightedProgress = cInfo.isWeightedProgress
+                })
+            elseif C_Scenario.GetCriteriaInfo then
+                local success, description, _, completed, quantity, totalQuantity, _, _, _, _, _, _, _, isWeightedProgress = pcall(C_Scenario.GetCriteriaInfo, i)
+                if success and description then
+                    table.insert(self.state.criteria, {
+                        name = description,
+                        isCompleted = completed,
+                        quantity = quantity,
+                        totalQuantity = totalQuantity,
+                        isWeightedProgress = isWeightedProgress
+                    })
+                end
+            end
+        end
+    end
 
     local activeKeystoneLevel, activeAffixIDs = C_ChallengeMode.GetActiveKeystoneInfo()
     if activeKeystoneLevel and activeKeystoneLevel > 0 then

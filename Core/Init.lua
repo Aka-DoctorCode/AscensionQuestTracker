@@ -17,6 +17,30 @@ function ascensionTracker:init()
     addonTable.config:init()
     if addonTable.config.db.profile.automation.hideNativeTracker then
         self:disableNativeTracker()
+    elseif addonTable.config.db.profile.automation.autoCollapseAll and ObjectiveTrackerFrame and ObjectiveTrackerFrame.SetCollapsed then
+        ObjectiveTrackerFrame:SetCollapsed(true)
+    end
+
+    if ObjectiveTrackerFrame and ObjectiveTrackerFrame.SetCollapsed then
+        hooksecurefunc(ObjectiveTrackerFrame, "SetCollapsed", function(frame, collapsed)
+            if addonTable.config and addonTable.config.db and addonTable.config.db.profile.automation.autoCollapseAll then
+                if not collapsed then
+                    if addonTable.autoCollapseTimer then
+                        addonTable.autoCollapseTimer:Cancel()
+                    end
+                    addonTable.autoCollapseTimer = C_Timer.NewTimer(40, function()
+                        if ObjectiveTrackerFrame and not ObjectiveTrackerFrame.isCollapsed then
+                            ObjectiveTrackerFrame:SetCollapsed(true)
+                        end
+                    end)
+                else
+                    if addonTable.autoCollapseTimer then
+                        addonTable.autoCollapseTimer:Cancel()
+                        addonTable.autoCollapseTimer = nil
+                    end
+                end
+            end
+        end)
     end
     self:createContainer()
     self:setupEditMode()
@@ -41,7 +65,6 @@ function ascensionTracker:disableNativeTracker()
         ProfessionsRecipeTracker,
         QuestObjectiveTracker,
         ScenarioObjectiveTracker,
-        UIWidgetObjectiveTracker,
         WorldQuestObjectiveTracker
     }
 
@@ -198,12 +221,7 @@ function ascensionTracker:saveAnchorPoint()
     local screenWidth = GetScreenWidth()
     local screenHeight = GetScreenHeight()
 
-    local point = "CENTER"
-    if y > screenHeight / 2 then
-        point = "TOP"
-    else
-        point = "BOTTOM"
-    end
+    local point = "TOP"
 
     if x > screenWidth / 2 then
         point = point .. "RIGHT"

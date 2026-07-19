@@ -51,10 +51,23 @@ function questData:parseQuest(questID, logIndex)
 
     local isComplete = C_QuestLog.IsComplete(questID)
     local isFailed   = C_QuestLog.IsFailed(questID)
-    local objectives = C_QuestLog.GetQuestObjectives(questID)
 
-    -- GetQuestLogSpecialItemInfo requires the log index (not watch index)
-    local itemLink, itemIcon = GetQuestLogSpecialItemInfo(logIndex)
+    local objectives, itemLink, itemIcon, spellID, spellName, spellTexture, spellFinished
+    if not isComplete then
+        objectives = C_QuestLog.GetQuestObjectives(questID)
+
+        -- GetQuestLogSpecialItemInfo requires the log index (not watch index)
+        itemLink, itemIcon = GetQuestLogSpecialItemInfo(logIndex)
+
+        if GetQuestLogCriteriaSpell then
+            local oldSelection = C_QuestLog.GetSelectedQuest()
+            C_QuestLog.SetSelectedQuest(questID)
+            spellID, spellName, spellTexture, spellFinished = GetQuestLogCriteriaSpell()
+            if oldSelection then
+                C_QuestLog.SetSelectedQuest(oldSelection)
+            end
+        end
+    end
 
     local campaignID   = info.campaignID
     local campaignInfo = nil
@@ -62,10 +75,43 @@ function questData:parseQuest(questID, logIndex)
         campaignInfo = C_CampaignInfo.GetCampaignInfo(campaignID)
     end
 
-    local distanceSq = 0
+    local isCampaign = (campaignID and campaignID > 0) or info.isStory or false
+
+    local distanceSq = 999999999
     if C_QuestLog.GetDistanceSqToQuest then
-        distanceSq = C_QuestLog.GetDistanceSqToQuest(questID) or 0
+        local dSq = C_QuestLog.GetDistanceSqToQuest(questID)
+        if dSq then distanceSq = dSq end
     end
+
+    local isLocal = info.isOnMap or false
+    
+    local distanceSq, onCont
+    if C_QuestLog.GetDistanceSqToQuest then
+        distanceSq, onCont = C_QuestLog.GetDistanceSqToQuest(questID)
+    end
+
+    if not isLocal then
+        local uiMapID = C_Map.GetBestMapForUnit("player")
+        if uiMapID then
+            local questsOnMap = C_QuestLog.GetQuestsOnMap(uiMapID)
+            if questsOnMap then
+                for _, qInfo in ipairs(questsOnMap) do
+                    local qID = type(qInfo) == "table" and qInfo.questID or qInfo
+                    if qID == questID then
+                        isLocal = true
+                        break
+                    end
+                end
+            end
+        end
+    end
+    
+    -- Weekly quests should not be moved to Local Quests, keep them in their original category
+    if info.frequency == Enum.QuestFrequency.Weekly or info.frequency == 2 then
+        isLocal = false
+    end
+
+    local isOnMap = info.isOnMap or false
 
     table.insert(self.activeQuests, {
         id           = questID,
@@ -73,12 +119,29 @@ function questData:parseQuest(questID, logIndex)
         level        = info.level,
         isBounty     = info.isBounty,
         isStory      = info.isStory,
+        isCampaign   = isCampaign,
+        isOnMap      = isOnMap,
+        isLocal      = isLocal,
         isComplete   = isComplete,
         isFailed     = isFailed,
         objectives   = objectives,
         itemIcon     = itemIcon,
         itemLink     = itemLink,
+        spellID      = spellID,
+        spellTexture = spellTexture,
         distanceSq   = distanceSq,
         campaignInfo = campaignInfo
     })
+    
+    table.sort(self.activeQuests, function(a, b)
+        if a.isOnMap ~= b.isOnMap then
+            return a.isOnMap == true
+        end
+        local distA = a.distanceSq or 99999999
+        local distB = b.distanceSq or 99999999
+        if distA ~= distB then
+            return distA < distB
+        end
+        return a.id < b.id
+    end)
 end

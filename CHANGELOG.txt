@@ -1,5 +1,23 @@
 <h1>@project-version@</h1>
 <ul>
+    <li>Update Scenario API for Retail WoW</li>
+    <li>Add comprehensive Scenario and Stage tracker (Stage name, step description, sub-criteria, and progress amounts)</li>
+    <li>Add Mythic+ affixes and death counts</li>
+    <li>Fix tracker default anchor to TOPRIGHT so frame growth is consistent</li>
+    <li>Fix UI collapse lock issue</li>
+    <li>Add "Auto Collapse All" option in the Automation config tab</li>
+    <li>Add reload UI popup prompt when toggling Blizzard tracker visibility</li>
+    <li>Add 40-second timeout to re-collapse Blizzard tracker if automatically managed</li>
+    <li>Improve local quest detection to accurately show quests on your current map instead of relying on a distance limit</li>
+    <li>Fix missing icons for quest abilities and ensure all quest items can be used properly when clicked</li>
+    <li>Improve the layout of quests with buttons so the text aligns neatly in columns</li>
+    <li>Allow dragging quest items and abilities directly to your action bars</li>
+    <li>Reduce the spacing between quest titles and their objectives to make the tracker more compact</li>
+    <li>Slightly increase the size of category headers to make them easier to read and fix hidden separator lines</li>
+</ul>
+<br>
+<h1>V15</h1>
+<ul>
     <li>License Update</li>
     <li>Readme Updated</li>
 </ul>
