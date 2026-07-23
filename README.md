@@ -19,6 +19,7 @@
 *   **Action Bar Integration**: Instantly drag and drop quest items or abilities directly from the tracker onto your action bars.
 *   **Smarter Quest Tracking**: Automatically detects which quests belong to your current map without relying on arbitrary distance limits.
 *   **Refined Design**: Enjoy a cleaner, more compact look for quests with abilities, along with easier-to-read category headers.
+*   **Scenario & Mythic+ Tracking**: Full support for Scenarios, Torghast Anima Powers with charges, Torments, and Mythic+ affixes and death counters.
 *   **Total Customization**: Full control over font sizes, colors, and background opacity via the interface options menu.
 
 ## Configuration
@@ -44,6 +45,7 @@ Settings can be accessed by navigating to **Game Menu (ESC) -> Options -> AddOns
 *   **Integración con Barras de Acción**: Arrastra y suelta instantáneamente objetos o habilidades de misión directamente desde el rastreador hacia tus barras de acción.
 *   **Rastreo Más Inteligente**: Detecta automáticamente las misiones de tu mapa actual sin depender de límites de distancia arbitrarios.
 *   **Diseño Refinado**: Disfruta de un diseño más limpio y compacto para misiones con habilidades, junto con encabezados de categoría más legibles.
+*   **Rastreo de Escenarios y Míticas+**: Soporte completo para Escenarios, Poderes de Ánima de Torghast con cargas, Tormentos, y afijos y muertes de Míticas+.
 *   **Personalización Total**: Control total sobre el tamaño de las fuentes, los colores y la opacidad del fondo a través del menú de opciones de la interfaz.
 
 ## Configuración

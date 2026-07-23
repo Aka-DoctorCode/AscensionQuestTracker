@@ -26,6 +26,8 @@ function dataEngine:init()
         "QUEST_WATCH_LIST_CHANGED",
         "SCENARIO_UPDATE",
         "SCENARIO_CRITERIA_UPDATE",
+        "SCENARIO_BONUS_VISIBILITY_CHANGED",
+        "UPDATE_UI_WIDGET",
         "CHALLENGE_MODE_START",
         "CHALLENGE_MODE_COMPLETED",
         "BAG_UPDATE_DELAYED",
@@ -74,12 +76,12 @@ end
 
 function dataEngine:updateAll()
     for _, moduleInstance in pairs(self.modules) do
-        if moduleInstance.update then
-            moduleInstance:update()
+        if moduleInstance and moduleInstance.update then
+            pcall(moduleInstance.update, moduleInstance)
         end
     end
 
     if addonTable.uiEngine and addonTable.uiEngine.render then
-        addonTable.uiEngine:render()
+        pcall(addonTable.uiEngine.render, addonTable.uiEngine)
     end
 end

@@ -14,48 +14,67 @@ addonTable.ascensionTracker = {}
 local ascensionTracker = addonTable.ascensionTracker
 
 function ascensionTracker:init()
-    addonTable.config:init()
-    if addonTable.config.db.profile.automation.hideNativeTracker then
-        self:disableNativeTracker()
-    elseif addonTable.config.db.profile.automation.autoCollapseAll and ObjectiveTrackerFrame and ObjectiveTrackerFrame.SetCollapsed then
-        ObjectiveTrackerFrame:SetCollapsed(true)
+    if addonTable.config and addonTable.config.init then
+        pcall(function() addonTable.config:init() end)
     end
 
-    if ObjectiveTrackerFrame and ObjectiveTrackerFrame.SetCollapsed then
-        hooksecurefunc(ObjectiveTrackerFrame, "SetCollapsed", function(frame, collapsed)
-            if addonTable.config and addonTable.config.db and addonTable.config.db.profile.automation.autoCollapseAll then
-                if not collapsed then
-                    if addonTable.autoCollapseTimer then
-                        addonTable.autoCollapseTimer:Cancel()
-                    end
-                    addonTable.autoCollapseTimer = C_Timer.NewTimer(40, function()
-                        if ObjectiveTrackerFrame and not ObjectiveTrackerFrame.isCollapsed then
-                            ObjectiveTrackerFrame:SetCollapsed(true)
-                        end
-                    end)
-                else
-                    if addonTable.autoCollapseTimer then
-                        addonTable.autoCollapseTimer:Cancel()
-                        addonTable.autoCollapseTimer = nil
-                    end
-                end
-            end
-        end)
-    end
     self:createContainer()
     self:setupEditMode()
-    addonTable.dataEngine:init()
-    if addonTable.uiEngine and addonTable.uiEngine.init then
-        addonTable.uiEngine:init()
-        addonTable.dataEngine:updateAll()
+
+    pcall(function()
+        if addonTable.config and addonTable.config.db and addonTable.config.db.profile and addonTable.config.db.profile.automation.hideNativeTracker then
+            self:disableNativeTracker()
+        elseif addonTable.config and addonTable.config.db and addonTable.config.db.profile and addonTable.config.db.profile.automation.autoCollapseAll and ObjectiveTrackerFrame and ObjectiveTrackerFrame.SetCollapsed then
+            ObjectiveTrackerFrame:SetCollapsed(true)
+        end
+    end)
+
+    if ObjectiveTrackerFrame and ObjectiveTrackerFrame.SetCollapsed then
+        pcall(function()
+            hooksecurefunc(ObjectiveTrackerFrame, "SetCollapsed", function(frame, collapsed)
+                if addonTable.config and addonTable.config.db and addonTable.config.db.profile and addonTable.config.db.profile.automation.autoCollapseAll then
+                    if not collapsed then
+                        if addonTable.autoCollapseTimer then
+                            addonTable.autoCollapseTimer:Cancel()
+                        end
+                        addonTable.autoCollapseTimer = C_Timer.NewTimer(40, function()
+                            if ObjectiveTrackerFrame and not ObjectiveTrackerFrame.isCollapsed then
+                                ObjectiveTrackerFrame:SetCollapsed(true)
+                            end
+                        end)
+                    else
+                        if addonTable.autoCollapseTimer then
+                            addonTable.autoCollapseTimer:Cancel()
+                            addonTable.autoCollapseTimer = nil
+                        end
+                    end
+                end
+            end)
+        end)
     end
-    self:updateBackground()
+
+    if addonTable.dataEngine and addonTable.dataEngine.init then
+        pcall(function() addonTable.dataEngine:init() end)
+    end
+    if addonTable.uiEngine and addonTable.uiEngine.init then
+        pcall(function()
+            addonTable.uiEngine:init()
+            addonTable.dataEngine:updateAll()
+        end)
+    end
+    pcall(function() self:updateBackground() end)
 end
 
 function ascensionTracker:disableNativeTracker()
-    ObjectiveTrackerFrame:UnregisterAllEvents()
-    ObjectiveTrackerFrame:Hide()
-    ObjectiveTrackerFrame:HookScript("OnShow", function(frame) frame:Hide() end)
+    if ObjectiveTrackerFrame then
+        pcall(function()
+            ObjectiveTrackerFrame:UnregisterAllEvents()
+            ObjectiveTrackerFrame:Hide()
+            if ObjectiveTrackerFrame.HookScript then
+                ObjectiveTrackerFrame:HookScript("OnShow", function(frame) frame:Hide() end)
+            end
+        end)
+    end
 
     local subTrackers = {
         AchievementObjectiveTracker,
@@ -70,9 +89,13 @@ function ascensionTracker:disableNativeTracker()
 
     for _, tracker in ipairs(subTrackers) do
         if tracker then
-            tracker:UnregisterAllEvents()
-            tracker:Hide()
-            tracker:HookScript("OnShow", function(frame) frame:Hide() end)
+            pcall(function()
+                tracker:UnregisterAllEvents()
+                tracker:Hide()
+                if tracker.HookScript then
+                    tracker:HookScript("OnShow", function(frame) frame:Hide() end)
+                end
+            end)
         end
     end
 end
@@ -244,7 +267,6 @@ function ascensionTracker:saveAnchorPoint()
     else
         self.masterFrame:SetPoint(point, UIParent, point, left, bottom)
     end
-
     if not AscensionQuestTrackerDB then AscensionQuestTrackerDB = {} end
     local pointStr, _, relativePointStr, xOfs, yOfs = self.masterFrame:GetPoint()
     AscensionQuestTrackerDB.anchor = {
@@ -262,3 +284,45 @@ eventFrame:SetScript("OnEvent", function(_, event)
         ascensionTracker:init()
     end
 end)
+
+SLASH_AQTDEBUG1 = "/aqtd"
+SlashCmdList["AQTDEBUG"] = function(msg)
+    print("--- AQT Debug Widget 3202 ---")
+    if C_UIWidgetManager.GetSpellDisplayVisualizationInfo then
+        local ok, info = pcall(C_UIWidgetManager.GetSpellDisplayVisualizationInfo, 3202)
+        if ok and type(info) == "table" then
+            print("GetSpellDisplayVisualizationInfo returned:")
+            for k, v in pairs(info) do
+                print("  " .. tostring(k) .. " = " .. type(v))
+            end
+            if info.spell then
+                print("  spell keys:")
+                for k, v in pairs(info.spell) do
+                    print("    " .. tostring(k) .. " = " .. tostring(v))
+                end
+            end
+            if info.spellInfo then
+                print("  spellInfo keys:")
+                for k, v in pairs(info.spellInfo) do
+                    print("    " .. tostring(k) .. " = " .. tostring(v))
+                end
+            end
+        else
+            print("GetSpellDisplayVisualizationInfo failed for 3202.")
+        end
+    else
+        print("C_UIWidgetManager.GetSpellDisplayVisualizationInfo not found!")
+    end
+    print("-----------------------------")
+end
+SLASH_AQTMAW1 = "/aqtmaw"
+SlashCmdList["AQTMAW"] = function()
+    local funcs = {}
+    for k, v in pairs(C_UIWidgetManager) do
+        table.insert(funcs, k)
+    end
+    table.sort(funcs)
+    for _, f in ipairs(funcs) do
+        print(f)
+    end
+end
