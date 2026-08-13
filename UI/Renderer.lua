@@ -20,7 +20,7 @@ function uiEngine:init()
     self.blockPool = CreateFramePool("Button", container, "AscensionQuestBlockTemplate")
     self.chipPool = CreateObjectPool(
         function()
-            local chip = CreateFrame("Frame", nil, container, "BackdropTemplate")
+            local chip = CreateFrame("Button", nil, container, "BackdropTemplate")
             chip:SetHeight(20)
             chip:SetBackdrop({
                 bgFile = "Interface\\Buttons\\WHITE8x8",
@@ -73,24 +73,23 @@ function uiEngine:init()
 
     self.headerPool = CreateObjectPool(
         function()
-            local header = CreateFrame("Button", nil, container)
-            header:SetHeight(20)
+            local header = CreateFrame("Button", nil, container, "BackdropTemplate")
+            header:SetHeight(24)
+
+            header:SetBackdrop({
+                bgFile = "Interface\\ChatFrame\\ChatFrameBackground",
+                edgeFile = "Interface\\Tooltips\\UI-Tooltip-Border",
+                tile = true,
+                tileSize = 16,
+                edgeSize = 10,
+                insets = { left = 3, right = 3, top = 3, bottom = 3 }
+            })
+            header:SetBackdropColor(0, 0, 0, 0.30)
+            header:SetBackdropBorderColor(unpack(self.colors.dividerLine))
 
             header.text = header:CreateFontString(nil, "OVERLAY", "GameFontNormal")
-            header.text:SetPoint("TOPLEFT", header, "TOPLEFT", 0, 0)
+            header.text:SetPoint("LEFT", header, "LEFT", 8, 0)
             header.text:SetJustifyH("LEFT")
-
-            header.divider = header:CreateTexture(nil, "BACKGROUND")
-            header.divider:SetColorTexture(unpack(self.colors.dividerLine))
-            if PixelUtil then
-                PixelUtil.SetHeight(header.divider, 2)
-                PixelUtil.SetPoint(header.divider, "BOTTOMLEFT", header, "BOTTOMLEFT", 0, 0)
-                PixelUtil.SetPoint(header.divider, "BOTTOMRIGHT", header, "BOTTOMRIGHT", 0, 0)
-            else
-                header.divider:SetHeight(2)
-                header.divider:SetPoint("BOTTOMLEFT", header, "BOTTOMLEFT", 0, 0)
-                header.divider:SetPoint("BOTTOMRIGHT", header, "BOTTOMRIGHT", 0, 0)
-            end
 
             return header
         end,
@@ -116,10 +115,6 @@ function uiEngine:init()
 end
 
 function uiEngine:render()
-    if InCombatLockdown() then
-        return
-    end
-
     if not addonTable.ascensionTracker or not addonTable.ascensionTracker.contentFrame then
         return
     end
@@ -143,6 +138,35 @@ function uiEngine:render()
     end
 
     local aggregatedBlocks = {}
+
+    local tgData = addonTable.dataEngine.modules["TorghastData"]
+    if tgData and tgData.state and tgData.state.widgets and #tgData.state.widgets > 0 then
+        local st = tgData.state
+        local objs = {}
+        for _, widgetItem in ipairs(st.widgets) do
+            table.insert(objs, {
+                text = widgetItem.text,
+                icon = widgetItem.icon,
+                spellID = widgetItem.spellID,
+                isIconOnly = widgetItem.isIconOnly,
+                category = widgetItem.category,
+                isCategoryHeader = widgetItem.isCategoryHeader,
+                isCurrency = widgetItem.isCurrency,
+                stacks = widgetItem.stacks,
+                numFulfilled = widgetItem.numFulfilled or 0,
+                numRequired = widgetItem.numRequired or 0,
+                isEmpowerment = widgetItem.isEmpowerment,
+                tooltip = widgetItem.tooltip,
+                widgetID = widgetItem.widgetID,
+                widgetSetID = widgetItem.widgetSetID,
+                widgetType = widgetItem.widgetType,
+                finished = false,
+                isScenarioWidget = true
+            })
+        end
+        table.insert(aggregatedBlocks,
+            { category = "Torghast", id = "torghast", title = "Torghast", objectives = objs, type = "scenario" })
+    end
 
     local scData = addonTable.dataEngine.modules["ScenarioData"]
     if scData and scData.state and scData.state.name then
@@ -183,26 +207,34 @@ function uiEngine:render()
                 end
             end
         end
-        if st.bonusSteps then
-            for _, bonusStep in ipairs(st.bonusSteps) do
-                if bonusStep.name then
-                    table.insert(objs, {
-                        text = "[Bonus] " .. bonusStep.name,
-                        numFulfilled = 0,
-                        numRequired = 0,
-                        finished = bonusStep.isCompleted,
-                        isScenarioWidget = true
-                    })
-                end
-                if bonusStep.criteria then
-                    for _, bonusCriterion in ipairs(bonusStep.criteria) do
-                        local req = bonusCriterion.totalQuantity or 1
+        if st.bonusSteps and #st.bonusSteps > 0 then
+            table.insert(objs, {
+                text = "Bonus Objectives",
+                numFulfilled = 0,
+                numRequired = 0,
+                finished = false,
+                isScenarioWidget = true,
+                isBonusHeader = true
+            })
+            for _, bs in ipairs(st.bonusSteps) do
+                table.insert(objs, {
+                    text = bs.name,
+                    numFulfilled = 0,
+                    numRequired = 0,
+                    finished = bs.isCompleted,
+                    isScenarioWidget = true,
+                    isBonusObjective = true
+                })
+                if bs.criteria then
+                    for _, c in ipairs(bs.criteria) do
+                        local req = c.totalQuantity or 1
                         table.insert(objs, {
-                            text = "- " .. (bonusCriterion.name or ""),
-                            numFulfilled = bonusCriterion.quantity or 0,
+                            text = "- " .. (c.name or ""),
+                            numFulfilled = c.quantity or 0,
                             numRequired = req,
-                            finished = bonusCriterion.isCompleted,
-                            isScenarioWidget = true
+                            finished = c.isCompleted,
+                            isScenarioWidget = true,
+                            isBonusObjective = true
                         })
                     end
                 end
@@ -219,8 +251,10 @@ function uiEngine:render()
                     isCategoryHeader = widgetItem.isCategoryHeader,
                     isCurrency = widgetItem.isCurrency,
                     stacks = widgetItem.stacks,
-                    numFulfilled = 0,
-                    numRequired = 0,
+                    numFulfilled = widgetItem.numFulfilled or 0,
+                    numRequired = widgetItem.numRequired or 0,
+                    isEmpowerment = widgetItem.isEmpowerment,
+                    tooltip = widgetItem.tooltip,
                     finished = false,
                     isScenarioWidget = true
                 })
@@ -332,21 +366,6 @@ function uiEngine:render()
         end
     end
 
-    local boData = addonTable.dataEngine.modules["BonusObjectiveData"]
-    if boData and boData.activeQuests and #boData.activeQuests > 0 then
-        for _, q in ipairs(boData.activeQuests) do
-            table.insert(aggregatedBlocks,
-                {
-                    category = "Bonus Objectives",
-                    id = q.id,
-                    title = q.title,
-                    objectives = q.objectives,
-                    type =
-                    "bonusobjective"
-                })
-        end
-    end
-
     local achData = addonTable.dataEngine.modules["AchievementData"]
     if achData and achData.activeAchievements and #achData.activeAchievements > 0 then
         for _, a in ipairs(achData.activeAchievements) do
@@ -375,16 +394,28 @@ function uiEngine:render()
 
     local tpData = addonTable.dataEngine.modules["TradingPostData"]
     if tpData and tpData.activeActivities and #tpData.activeActivities > 0 then
-        for _, a in ipairs(tpData.activeActivities) do
-            local objs = {}
-            table.insert(objs, {
-                text = "Progress",
-                numFulfilled = a.progress,
-                numRequired = a.threshold,
-                finished = a.completed
-            })
+        for _, activity in ipairs(tpData.activeActivities) do
+            local objectiveList = {}
+            if activity.requirements and #activity.requirements > 0 then
+                for _, req in ipairs(activity.requirements) do
+                    table.insert(objectiveList, {
+                        text = req.text,
+                        numFulfilled = req.finished and 1 or 0,
+                        numRequired = 1,
+                        finished = req.finished
+                    })
+                end
+            else
+                local progressText = string.format("%d/%d", activity.progress or 0, activity.threshold or 0)
+                table.insert(objectiveList, {
+                    text = progressText,
+                    numFulfilled = activity.progress,
+                    numRequired = activity.threshold,
+                    finished = activity.completed
+                })
+            end
             table.insert(aggregatedBlocks,
-                { category = "Traveler's Log", id = a.id, title = a.title, objectives = objs, type = "tradingpost" })
+                { category = "Traveler's Log", id = activity.id, title = activity.title, objectives = objectiveList, type = "tradingpost" })
         end
     end
 
@@ -400,8 +431,8 @@ function uiEngine:render()
             headerFrame:Show()
 
             headerFrame.text:ClearAllPoints()
-            headerFrame.text:SetPoint("TOPLEFT", headerFrame, "TOPLEFT", 0, 0)
-            headerFrame.text:SetWidth(maxWidth)
+            headerFrame.text:SetPoint("LEFT", headerFrame, "LEFT", 8, 0)
+            headerFrame.text:SetWidth(maxWidth - 16)
             headerFrame.text:SetWordWrap(true)
             headerFrame.text:SetNonSpaceWrap(true)
 
@@ -464,8 +495,12 @@ function uiEngine:render()
                     elseif f.blockType == "profession" then
                         C_TradeSkillUI.SetRecipeTracked(f.questID, false, false)
                     elseif f.blockType == "tradingpost" then
-                        if C_PerksActivities and C_PerksActivities.RemoveTrackedActivity then
-                            C_PerksActivities.RemoveTrackedActivity(f.questID)
+                        if C_PerksActivities then
+                            if C_PerksActivities.RemoveTrackedActivity then
+                                C_PerksActivities.RemoveTrackedActivity(f.questID)
+                            elseif C_PerksActivities.RemoveTrackedPerksActivity then
+                                C_PerksActivities.RemoveTrackedPerksActivity(f.questID)
+                            end
                         end
                     elseif f.blockType == "worldquest" and C_QuestLog.RemoveWorldQuestWatch then
                         C_QuestLog.RemoveWorldQuestWatch(f.questID)
@@ -484,6 +519,10 @@ function uiEngine:render()
                                 OpenAchievementFrameToAchievement(f.questID)
                             elseif f.blockType == "quest" or f.blockType == "worldquest" then
                                 QuestMapFrame_OpenToQuestDetails(f.questID)
+                            elseif f.blockType == "tradingpost" and not InCombatLockdown() then
+                                if ToggleEncounterJournal then
+                                    ToggleEncounterJournal(5)
+                                end
                             end
                         end
                         UIDropDownMenu_AddButton(info)
@@ -684,7 +723,10 @@ function uiEngine:render()
                         local chipWidth = math.max(50, maxWidth - 10 - currentX)
                         local actualChipHeight = 20
 
-                        if obj.isIconOnly then
+                        if obj.isEmpowerment then
+                            chipWidth = math.max(150, maxWidth - 20)
+                            actualChipHeight = 24
+                        elseif obj.isIconOnly then
                             if obj.category == "Anima Powers" then
                                 chipWidth = 24
                                 actualChipHeight = 24
@@ -761,54 +803,112 @@ function uiEngine:render()
                             chip.stackText:Hide()
                         end
 
-                        if obj.isIconOnly and obj.spellID then
-                            chip:EnableMouse(true)
-                            chip:SetScript("OnEnter", function(self)
+                        chip.widgetInfo = obj
+                        chip:EnableMouse(true)
+                        chip:RegisterForClicks("LeftButtonUp", "RightButtonUp")
+
+                        chip:SetScript("OnEnter", function(self)
+                            local info = self.widgetInfo
+                            if info and info.isIconOnly and info.spellID then
                                 GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
-                                GameTooltip:SetSpellByID(obj.spellID)
+                                GameTooltip:SetSpellByID(info.spellID)
                                 GameTooltip:Show()
-                            end)
-                            chip:SetScript("OnLeave", function(self)
-                                GameTooltip:Hide()
-                            end)
-                        else
-                            chip:EnableMouse(false)
-                            chip:SetScript("OnEnter", nil)
-                            chip:SetScript("OnLeave", nil)
-                        end
+                            elseif info and info.tooltip then
+                                GameTooltip:SetOwner(self, "ANCHOR_RIGHT")
+                                GameTooltip:SetText(info.tooltip, 1, 1, 1, 1, true)
+                                GameTooltip:Show()
+                            end
+                        end)
+
+                        chip:SetScript("OnLeave", function(self)
+                            GameTooltip:Hide()
+                        end)
 
                         -- Dynamic progress logic
-                        local progressRatio = (numRequired > 0) and (numFulfilled / numRequired) or 1
+                        local progressRatio = 1
+                        if obj.isEmpowerment then
+                            progressRatio = math.min(1.0, (numFulfilled or 0) / 400)
+                        elseif numRequired > 0 then
+                            progressRatio = math.min(1.0, (numFulfilled or 0) / numRequired)
+                        end
                         chip.progressBar:SetValue(progressRatio * 100)
 
-                        if quest.isComplete or isObjFinished then
-                            chip.progressBar:SetAlpha(0)
-                            chip.text:SetTextColor(unpack(self.colors.success))
-                            chip:SetAlpha(1.0)
-                        elseif numRequired == 0 then
-                            chip.progressBar:SetAlpha(0)
-                            chip:SetAlpha(1.0)
-                            if obj.isCurrency then
-                                chip.text:SetTextColor(0.4, 0.7, 1.0)
-                            elseif obj.isCategoryHeader then
-                                chip.text:SetTextColor(unpack(self.colors.title))
-                            else
-                                chip.text:SetTextColor(unpack(self.colors.textLight))
-                            end
-                        else
+                        if obj.isEmpowerment then
+                            chip.progressBar:ClearAllPoints()
+                            chip.progressBar:SetPoint("TOPLEFT", chip, "TOPLEFT", 1, -1)
+                            chip.progressBar:SetPoint("BOTTOMRIGHT", chip, "BOTTOMRIGHT", -1, 1)
                             chip.progressBar:SetAlpha(1.0)
-                            chip:SetAlpha(1.0)
-                            if obj.isCategoryHeader then
-                                chip.text:SetTextColor(unpack(self.colors.title))
+
+                            if numFulfilled and numFulfilled > 300 then
+                                -- Overcharged (301 to 400): Fiery Crimson Flame fill
+                                chip.progressBar:SetStatusBarColor(1.0, 0.15, 0.0, 0.95)
+                                chip:SetBackdropColor(0.22, 0.03, 0.0, 0.9)
+                                chip:SetBackdropBorderColor(1.0, 0.35, 0.0, 1.0)
                             else
-                                chip.text:SetTextColor(unpack(self.colors.textLight))
+                                -- Standard fill (0 to 300): Torghast Amber/Gold fill
+                                chip.progressBar:SetStatusBarColor(0.95, 0.45, 0.05, 0.85)
+                                chip:SetBackdropColor(0.12, 0.06, 0.0, 0.85)
+                                chip:SetBackdropBorderColor(0.95, 0.6, 0.0, 0.9)
                             end
-                            -- Quester style gradient: Red -> Yellow -> Green
-                            local r = math.min(1, 2 - 2 * progressRatio)
-                            local g = math.min(1, 2 * progressRatio)
-                            local b = 0
-                            local alpha = self.colors.primaryHover[4] or 0.6
-                            chip.progressBar:SetStatusBarColor(r, g, b, alpha)
+
+                            chip.text:ClearAllPoints()
+                            chip.text:SetPoint("CENTER", chip, "CENTER", 0, 0)
+                            chip.text:SetTextColor(1, 1, 1, 1)
+                            chip:SetAlpha(1.0)
+                        else
+                            chip.progressBar:ClearAllPoints()
+                            chip.progressBar:SetHeight(4)
+                            chip.progressBar:SetPoint("BOTTOMLEFT", chip, "BOTTOMLEFT", 0, -2)
+                            chip.progressBar:SetPoint("BOTTOMRIGHT", chip, "BOTTOMRIGHT", 0, -2)
+                            chip:SetBackdropColor(0, 0, 0, 0)
+                            chip:SetBackdropBorderColor(0, 0, 0, 0)
+
+                            if quest.isComplete or isObjFinished then
+                                chip.progressBar:SetAlpha(0)
+                                if obj.isBonusHeader then
+                                    chip.text:SetTextColor(0.8, 0.3, 1.0)
+                                elseif obj.isBonusObjective then
+                                    chip.text:SetTextColor(0.7, 0.4, 1.0)
+                                else
+                                    chip.text:SetTextColor(unpack(self.colors.success))
+                                end
+                                chip:SetAlpha(1.0)
+                            elseif numRequired == 0 then
+                                chip.progressBar:SetAlpha(0)
+                                chip:SetAlpha(1.0)
+                                if obj.isCurrency then
+                                    chip.text:SetTextColor(0.4, 0.7, 1.0)
+                                elseif obj.isBonusHeader then
+                                    chip.text:SetTextColor(0.8, 0.3, 1.0)
+                                elseif obj.isBonusObjective then
+                                    chip.text:SetTextColor(0.7, 0.4, 1.0)
+                                elseif obj.isCategoryHeader then
+                                    chip.text:SetTextColor(unpack(self.colors.title))
+                                else
+                                    chip.text:SetTextColor(unpack(self.colors.textLight))
+                                end
+                            else
+                                chip.progressBar:SetAlpha(1.0)
+                                chip:SetAlpha(1.0)
+                                if obj.isBonusHeader then
+                                    chip.text:SetTextColor(0.8, 0.3, 1.0)
+                                elseif obj.isBonusObjective then
+                                    chip.text:SetTextColor(0.7, 0.4, 1.0)
+                                elseif obj.isCategoryHeader then
+                                    chip.text:SetTextColor(unpack(self.colors.title))
+                                else
+                                    chip.text:SetTextColor(unpack(self.colors.textLight))
+                                end
+                                local alpha = self.colors.primaryHover[4] or 0.6
+                                if obj.isBonusObjective or obj.isBonusHeader then
+                                    chip.progressBar:SetStatusBarColor(0.7, 0.4, 1.0, alpha)
+                                else
+                                    local r = math.min(1, 2 - 2 * progressRatio)
+                                    local g = math.min(1, 2 * progressRatio)
+                                    local b = 0
+                                    chip.progressBar:SetStatusBarColor(r, g, b, alpha)
+                                end
+                            end
                         end
 
                         -- Flex-wrap math: If X position + chip width exceeds container max width, wrap to new line

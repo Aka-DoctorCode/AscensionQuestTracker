@@ -72,7 +72,9 @@ function scenarioData:extractWidgetData(widgetSetId, seenTexts)
     local tempWidgets = {}
     local currentOrderIndex = 0
 
-    local function addWidget(w)
+    local currentWidgetId = 0
+
+    local function addWidget(w, widgetType)
         if w.text then
             local lowerText = string.lower(w.text)
             
@@ -89,6 +91,9 @@ function scenarioData:extractWidgetData(widgetSetId, seenTexts)
             end
         end
         w.orderIndex = currentOrderIndex
+        w.widgetID = currentWidgetId
+        w.widgetSetID = widgetSetId
+        w.widgetType = widgetType or "Widget"
         table.insert(tempWidgets, w)
     end
 
@@ -107,6 +112,7 @@ function scenarioData:extractWidgetData(widgetSetId, seenTexts)
     for _, widgetInfo in ipairs(widgetList) do
         local widgetId = type(widgetInfo) == "number" and widgetInfo or (type(widgetInfo) == "table" and (widgetInfo.widgetID or widgetInfo.widgetId))
         if widgetId then
+            currentWidgetId = widgetId
             currentOrderIndex = 0
 
             if C_UIWidgetManager.GetTextWithStateWidgetVisualizationInfo then
@@ -115,7 +121,7 @@ function scenarioData:extractWidgetData(widgetSetId, seenTexts)
                     if not seenTexts[textInfo.text] then
                         seenTexts[textInfo.text] = true
                         currentOrderIndex = textInfo.orderIndex or 0
-                        addWidget({ text = textInfo.text })
+                        addWidget({ text = textInfo.text }, "TextWithState")
                     end
                 end
             end
@@ -201,16 +207,69 @@ function scenarioData:extractWidgetData(widgetSetId, seenTexts)
                     local label = statusBarInfo.text or statusBarInfo.overrideBarText or statusBarInfo.label or ""
                     local val = statusBarInfo.barValue or 0
                     local maxVal = statusBarInfo.barMax or 100
-                    local barText = label
-                    if barText ~= "" then
-                        barText = barText .. ": " .. tostring(val) .. "/" .. tostring(maxVal)
-                    else
-                        barText = tostring(val) .. "/" .. tostring(maxVal)
+                    local tooltip = statusBarInfo.tooltip
+                    local frameTextureKit = statusBarInfo.frameTextureKit
+                    local isEmpowerment = false
+
+                    if frameTextureKit == "jailerstower-scorebar" or widgetId == 3330 or (tooltip and string.find(string.lower(tostring(tooltip)), "empower")) then
+                        label = "Torghast Empowerment"
+                        isEmpowerment = true
                     end
+
+                    if label == "" then
+                        label = "Objective"
+                    end
+
+                    local barText = label .. ": " .. tostring(val) .. "/" .. tostring(maxVal)
                     if not seenTexts[barText] then
                         seenTexts[barText] = true
                         currentOrderIndex = statusBarInfo.orderIndex or 0
-                        addWidget({ text = barText })
+                        addWidget({
+                            text = barText,
+                            numFulfilled = val,
+                            numRequired = maxVal,
+                            isEmpowerment = isEmpowerment,
+                            tooltip = tooltip
+                        }, "StatusBar")
+                    end
+                end
+            end
+
+            if C_UIWidgetManager.GetPowerBarWidgetVisualizationInfo then
+                local okPower, powerInfo = pcall(C_UIWidgetManager.GetPowerBarWidgetVisualizationInfo, widgetId)
+                if okPower and powerInfo and isWidgetShown(powerInfo) then
+                    local label = powerInfo.text or powerInfo.overrideBarText or powerInfo.label or powerInfo.tooltip or "Empowerment"
+                    if label == "" then label = "Empowerment" end
+                    local val = powerInfo.barValue or 0
+                    local maxVal = powerInfo.barMax or 100
+                    local barText = label .. ": " .. tostring(val) .. "/" .. tostring(maxVal)
+                    if not seenTexts[barText] then
+                        seenTexts[barText] = true
+                        currentOrderIndex = powerInfo.orderIndex or 0
+                        addWidget({
+                            text = barText,
+                            numFulfilled = val,
+                            numRequired = maxVal
+                        })
+                    end
+                end
+            end
+
+            if C_UIWidgetManager.GetScenarioHeaderTimerWidgetVisualizationInfo then
+                local okTimer, timerInfo = pcall(C_UIWidgetManager.GetScenarioHeaderTimerWidgetVisualizationInfo, widgetId)
+                if okTimer and timerInfo and isWidgetShown(timerInfo) then
+                    local label = timerInfo.headerText or timerInfo.text or timerInfo.title or "Timer"
+                    local val = timerInfo.barValue or timerInfo.timerValue or timerInfo.val or 0
+                    local maxVal = timerInfo.barMax or timerInfo.timerMax or timerInfo.maxVal or 100
+                    local barText = label .. ": " .. tostring(val) .. "/" .. tostring(maxVal)
+                    if not seenTexts[barText] then
+                        seenTexts[barText] = true
+                        currentOrderIndex = timerInfo.orderIndex or 0
+                        addWidget({
+                            text = barText,
+                            numFulfilled = val,
+                            numRequired = maxVal
+                        })
                     end
                 end
             end
@@ -262,12 +321,20 @@ function scenarioData:extractWidgetData(widgetSetId, seenTexts)
 
             if C_UIWidgetManager.GetDiscreteProgressStepsVisualizationInfo then
                 local okProg, progInfo = pcall(C_UIWidgetManager.GetDiscreteProgressStepsVisualizationInfo, widgetId)
-                if okProg and progInfo and isWidgetShown(progInfo) and progInfo.text then
+                if okProg and progInfo and isWidgetShown(progInfo) then
                     local text = progInfo.text
-                    if text ~= "" and not seenTexts[text] then
-                        seenTexts[text] = true
+                    if not text or text == "" then text = "Empowerment" end
+                    local val = progInfo.progressVal or progInfo.numFullSteps or 0
+                    local maxVal = progInfo.progressMax or progInfo.numTotalSteps or 100
+                    local barText = text .. ": " .. tostring(val) .. "/" .. tostring(maxVal)
+                    if not seenTexts[barText] then
+                        seenTexts[barText] = true
                         currentOrderIndex = progInfo.orderIndex or 0
-                        addWidget({ text = text .. ": " .. tostring(progInfo.progressVal or 0) .. "/" .. tostring(progInfo.progressMax or 0) })
+                        addWidget({
+                            text = barText,
+                            numFulfilled = val,
+                            numRequired = maxVal
+                        })
                     end
                 end
             end
@@ -343,6 +410,12 @@ function scenarioData:update()
     self.state.criteria = {}
     self.state.bonusSteps = {}
     self.state.affixes = {}
+
+    -- Yield to TorghastData if inside Torghast
+    local tgData = addonTable.dataEngine.modules["TorghastData"]
+    if tgData and tgData.isTorghastScenario and tgData:isTorghastScenario() then
+        return
+    end
 
     local inScenario = C_Scenario and C_Scenario.IsInScenario and C_Scenario.IsInScenario()
     local scenarioName, currentStage, numStages, scenarioWidgetSetId
@@ -453,6 +526,16 @@ function scenarioData:update()
                         end
                     end
                 end
+
+                local lowerName = string.lower(bonusStepName or "")
+                if (bonusStepName == nil or bonusStepName == "" or lowerName == "bonus objective" or lowerName == "objetivo adicional") then
+                    if bonusStepDesc and bonusStepDesc ~= "" then
+                        bonusStepName = bonusStepDesc
+                    elseif #bonusCriteria > 0 and bonusCriteria[1].name then
+                        bonusStepName = bonusCriteria[1].name
+                    end
+                end
+
                 table.insert(self.state.bonusSteps, {
                     name = bonusStepName,
                     description = bonusStepDesc,
@@ -571,20 +654,7 @@ function scenarioData:update()
         end
     end
 
-    if C_CurrencyInfo and C_CurrencyInfo.GetCurrencyInfo then
-        local phantasmaIds = {1718, 1728}
-        for _, cId in ipairs(phantasmaIds) do
-            local okCurr, phantasmaInfo = pcall(C_CurrencyInfo.GetCurrencyInfo, cId)
-            if okCurr and phantasmaInfo and phantasmaInfo.quantity and phantasmaInfo.quantity > 0 then
-                local text = "Phantasma: " .. tostring(phantasmaInfo.quantity)
-                if not seenTexts[text] then
-                    table.insert(self.state.widgets, { text = text, isCurrency = true })
-                    seenTexts[text] = true
-                end
-                break
-            end
-        end
-    end
+
 
     if C_ChallengeMode and C_ChallengeMode.GetActiveKeystoneInfo then
         local okKey, activeKeystoneLevel, activeAffixIDs = pcall(C_ChallengeMode.GetActiveKeystoneInfo)

@@ -1,8 +1,6 @@
 <h1>@project-version@</h1>
 <ul>
-    <li>Add support for custom widgets related to Torghast (Anima Powers, Torments, Phantasma, and stack charges)</li>
-    <li>Enable automatic multi-line text wrapping and dynamic frame height adjustment for long scenario titles and category headers to prevent text truncation</li>
-    <li>Add Mythic+ death counter tracking and filter duplicate death widgets in Scenarios</li>
+    <li>12.1 .toc update</li>
 </ul>
 <br>
 <h2>Positive feedback is always appreciated, it helps me to continue working on this project</h2>

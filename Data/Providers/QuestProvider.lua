@@ -19,9 +19,26 @@ function questData:init()
     self.eventFrame = CreateFrame("Frame")
     self.eventFrame:RegisterEvent("QUEST_LOG_UPDATE")
     self.eventFrame:RegisterEvent("QUEST_WATCH_LIST_CHANGED")
-    self.eventFrame:SetScript("OnEvent", function()
+    self.eventFrame:RegisterEvent("QUEST_WATCH_UPDATE")
+    self.eventFrame:RegisterEvent("QUEST_TURNED_IN")
+    self.eventFrame:RegisterEvent("QUEST_REMOVED")
+    self.eventFrame:RegisterEvent("QUEST_ACCEPTED")
+    self.eventFrame:RegisterEvent("QUEST_AUTOCOMPLETE")
+    self.eventFrame:SetScript("OnEvent", function(_, eventName)
         if addonTable.dataEngine then
             addonTable.dataEngine:queueUpdate()
+            if eventName == "QUEST_TURNED_IN" or eventName == "QUEST_REMOVED" or eventName == "QUEST_AUTOCOMPLETE" then
+                C_Timer.After(0.15, function()
+                    if addonTable.dataEngine then
+                        addonTable.dataEngine:queueUpdate()
+                    end
+                end)
+                C_Timer.After(0.4, function()
+                    if addonTable.dataEngine then
+                        addonTable.dataEngine:queueUpdate()
+                    end
+                end)
+            end
         end
     end)
 end
@@ -31,14 +48,16 @@ function questData:update()
 
     local numEntries = C_QuestLog.GetNumQuestLogEntries()
     for logIndex = 1, numEntries do
-        local info = C_QuestLog.GetInfo(logIndex)
-        if info and not info.isHeader then
-            local questID = info.questID
-            if not C_QuestLog.IsWorldQuest(questID) then
-                -- Only include quests that are actively watched/tracked
-                local watchType = C_QuestLog.GetQuestWatchType(questID)
-                if watchType ~= nil then
-                    self:parseQuest(questID, logIndex)
+        local questInfo = C_QuestLog.GetInfo(logIndex)
+        if questInfo and not questInfo.isHeader then
+            local questId = questInfo.questID
+            if questId and not C_QuestLog.IsWorldQuest(questId) then
+                local isFlaggedComplete = C_QuestLog.IsQuestFlaggedCompleted(questId)
+                if not isFlaggedComplete then
+                    local watchType = C_QuestLog.GetQuestWatchType(questId)
+                    if watchType ~= nil then
+                        self:parseQuest(questId, logIndex)
+                    end
                 end
             end
         end

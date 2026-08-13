@@ -20,6 +20,8 @@
 *   **Smarter Quest Tracking**: Automatically detects which quests belong to your current map without relying on arbitrary distance limits.
 *   **Refined Design**: Enjoy a cleaner, more compact look for quests with abilities, along with easier-to-read category headers.
 *   **Scenario & Mythic+ Tracking**: Full support for Scenarios, Torghast Anima Powers with charges, Torments, and Mythic+ affixes and death counters.
+*   **Traveler's Log Tracking**: Track Trading Post activities with detailed requirements, progress counters, and direct context menu interaction.
+*   **Dedicated Dungeon & Scenario Tracking**: Seamless handling of Dungeons, Mythic+, and Scenarios with exact zone and scenario identification.
 *   **Total Customization**: Full control over font sizes, colors, and background opacity via the interface options menu.
 
 ## Configuration
@@ -46,6 +48,8 @@ Settings can be accessed by navigating to **Game Menu (ESC) -> Options -> AddOns
 *   **Rastreo Más Inteligente**: Detecta automáticamente las misiones de tu mapa actual sin depender de límites de distancia arbitrarios.
 *   **Diseño Refinado**: Disfruta de un diseño más limpio y compacto para misiones con habilidades, junto con encabezados de categoría más legibles.
 *   **Rastreo de Escenarios y Míticas+**: Soporte completo para Escenarios, Poderes de Ánima de Torghast con cargas, Tormentos, y afijos y muertes de Míticas+.
+*   **Rastreo del Cuaderno del Viajero**: Rastrea actividades del Puesto Comercial con requisitos detallados, contadores de progreso e interacción directa desde el menú contextual.
+*   **Rastreo Dedicado de Mazmorras y Escenarios**: Gestión perfecta de Mazmorras, Míticas+ y Escenarios con identificación precisa de zona y escenario.
 *   **Personalización Total**: Control total sobre el tamaño de las fuentes, los colores y la opacidad del fondo a través del menú de opciones de la interfaz.
 
 ## Configuración

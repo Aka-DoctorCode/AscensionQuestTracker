@@ -39,23 +39,5 @@ function widgetData:update()
 end
 
 function widgetData:processWidgetFrame(widgetFrame)
-    if not widgetFrame then return end
-    local contentFrame = addonTable.ascensionTracker.contentFrame
-    widgetFrame:SetParent(contentFrame)
-
-    for _, region in ipairs({widgetFrame:GetRegions()}) do
-        if region:IsObjectType("Texture") then
-            region:SetAlpha(0)
-        end
-    end
-
-    for _, child in ipairs({widgetFrame:GetChildren()}) do
-        if not child:IsObjectType("StatusBar") then
-            for _, region in ipairs({child:GetRegions()}) do
-                if region:IsObjectType("Texture") then
-                    region:SetAlpha(0)
-                end
-            end
-        end
-    end
+    return
 end

@@ -22,9 +22,7 @@ function ascensionTracker:init()
     self:setupEditMode()
 
     pcall(function()
-        if addonTable.config and addonTable.config.db and addonTable.config.db.profile and addonTable.config.db.profile.automation.hideNativeTracker then
-            self:disableNativeTracker()
-        elseif addonTable.config and addonTable.config.db and addonTable.config.db.profile and addonTable.config.db.profile.automation.autoCollapseAll and ObjectiveTrackerFrame and ObjectiveTrackerFrame.SetCollapsed then
+        if addonTable.config and addonTable.config.db and addonTable.config.db.profile and addonTable.config.db.profile.automation.autoCollapseAll and ObjectiveTrackerFrame and ObjectiveTrackerFrame.SetCollapsed then
             ObjectiveTrackerFrame:SetCollapsed(true)
         end
     end)
@@ -65,40 +63,6 @@ function ascensionTracker:init()
     pcall(function() self:updateBackground() end)
 end
 
-function ascensionTracker:disableNativeTracker()
-    if ObjectiveTrackerFrame then
-        pcall(function()
-            ObjectiveTrackerFrame:UnregisterAllEvents()
-            ObjectiveTrackerFrame:Hide()
-            if ObjectiveTrackerFrame.HookScript then
-                ObjectiveTrackerFrame:HookScript("OnShow", function(frame) frame:Hide() end)
-            end
-        end)
-    end
-
-    local subTrackers = {
-        AchievementObjectiveTracker,
-        BonusObjectiveTracker,
-        CampaignQuestObjectiveTracker,
-        MonthlyActivitiesObjectiveTracker,
-        ProfessionsRecipeTracker,
-        QuestObjectiveTracker,
-        ScenarioObjectiveTracker,
-        WorldQuestObjectiveTracker
-    }
-
-    for _, tracker in ipairs(subTrackers) do
-        if tracker then
-            pcall(function()
-                tracker:UnregisterAllEvents()
-                tracker:Hide()
-                if tracker.HookScript then
-                    tracker:HookScript("OnShow", function(frame) frame:Hide() end)
-                end
-            end)
-        end
-    end
-end
 
 function ascensionTracker:createContainer()
     local dragHandleHeight = 16
@@ -284,45 +248,3 @@ eventFrame:SetScript("OnEvent", function(_, event)
         ascensionTracker:init()
     end
 end)
-
-SLASH_AQTDEBUG1 = "/aqtd"
-SlashCmdList["AQTDEBUG"] = function(msg)
-    print("--- AQT Debug Widget 3202 ---")
-    if C_UIWidgetManager.GetSpellDisplayVisualizationInfo then
-        local ok, info = pcall(C_UIWidgetManager.GetSpellDisplayVisualizationInfo, 3202)
-        if ok and type(info) == "table" then
-            print("GetSpellDisplayVisualizationInfo returned:")
-            for k, v in pairs(info) do
-                print("  " .. tostring(k) .. " = " .. type(v))
-            end
-            if info.spell then
-                print("  spell keys:")
-                for k, v in pairs(info.spell) do
-                    print("    " .. tostring(k) .. " = " .. tostring(v))
-                end
-            end
-            if info.spellInfo then
-                print("  spellInfo keys:")
-                for k, v in pairs(info.spellInfo) do
-                    print("    " .. tostring(k) .. " = " .. tostring(v))
-                end
-            end
-        else
-            print("GetSpellDisplayVisualizationInfo failed for 3202.")
-        end
-    else
-        print("C_UIWidgetManager.GetSpellDisplayVisualizationInfo not found!")
-    end
-    print("-----------------------------")
-end
-SLASH_AQTMAW1 = "/aqtmaw"
-SlashCmdList["AQTMAW"] = function()
-    local funcs = {}
-    for k, v in pairs(C_UIWidgetManager) do
-        table.insert(funcs, k)
-    end
-    table.sort(funcs)
-    for _, f in ipairs(funcs) do
-        print(f)
-    end
-end

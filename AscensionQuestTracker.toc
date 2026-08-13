@@ -19,9 +19,9 @@ UI\Renderer.lua
 Data\Providers\QuestProvider.lua
 Data\Providers\WorldQuestProvider.lua
 Data\Providers\ScenarioProvider.lua
+Data\Providers\TorghastProvider.lua
 Data\Providers\AchievementProvider.lua
 Data\Providers\ProfessionProvider.lua
 Data\Providers\TradingPostProvider.lua
 Data\Providers\AutoQuestProvider.lua
 Data\Providers\WidgetProvider.lua
-Data\Providers\BonusObjectiveProvider.lua
