@@ -1,6 +1,6 @@
 <h1>@project-version@</h1>
 <ul>
-    <li>12.1 .toc update</li>
+    <li>Missed an update in the .toc file on the previous update: the game version was not updated to 12.1 and was still 12.0.7</li>
 </ul>
 <br>
 <h2>Positive feedback is always appreciated, it helps me to continue working on this project</h2>
