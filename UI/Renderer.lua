@@ -646,9 +646,9 @@ function uiEngine:render()
                 itemBtn:SetScript("OnDragStart", function(self)
                     if InCombatLockdown() then return end
                     if self.spellID then
-                        PickupSpell(self.spellID)
+                        C_Spell.PickupSpell(self.spellID)
                     elseif self.itemLink then
-                        PickupItem(self.itemLink)
+                        C_Item.PickupItem(self.itemLink)
                     end
                 end)
 
@@ -993,9 +993,9 @@ function uiEngine:processPendingItems()
         itemBtn:SetScript("OnDragStart", function(self)
             if InCombatLockdown() then return end
             if self.spellID then
-                PickupSpell(self.spellID)
+                C_Spell.PickupSpell(self.spellID)
             elseif self.itemLink then
-                PickupItem(self.itemLink)
+                C_Item.PickupItem(self.itemLink)
             end
         end)
 
